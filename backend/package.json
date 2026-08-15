@@ -1,0 +1,21 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "image to text ai generator backend",
+  "keywords": [
+    "ai",
+    "image",
+    "to",
+    "text"
+  ],
+  "license": "ISC",
+  "author": "mussadiq khan",
+  "type": "module ",
+  "main": "server.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}

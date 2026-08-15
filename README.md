@@ -1,0 +1,1 @@
+# image to text ai generator in nextjs and expressjs
