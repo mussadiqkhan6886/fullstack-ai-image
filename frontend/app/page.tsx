@@ -123,16 +123,15 @@ const [uploading, setUploading] = useState(false);
           </button>
           {(error || response) && <button className="bg-zinc-600 text-white text-sm px-3 cursor-pointer" onClick={clear}>Clear</button>}
         </div>
-        {(error || response) && <div>
+        <div>
           <div className='mb-6'>
             {error && <p className="font-semibold text-red-600 bg-red-200 px-2 py-4">{error}</p>}
             <div className="mt-6">
               {loading ? (
-                <div className="space-y-3 animate-pulse">
-                  <div className="h-4 bg-zinc-300 rounded" />
-                  <div className="h-4 bg-zinc-300 rounded w-11/12" />
-                  <div className="h-4 bg-zinc-300 rounded w-4/5" />
-                  <div className="h-4 bg-zinc-300 rounded w-3/5" />
+                <div className="flex gap-2 animate-pulse">
+                  <div className="h-2 w-2 bg-zinc-800 rounded" />
+                  <div className="h-2 w-2 bg-zinc-800 rounded " />
+                  <div className="h-2 w-2 bg-zinc-800 rounded " />
                 </div>
               ) : (
                 response && (
@@ -143,7 +142,7 @@ const [uploading, setUploading] = useState(false);
               )}
             </div>
           </div>
-        </div>}
+        </div>
       </section>
     </main>
   )
