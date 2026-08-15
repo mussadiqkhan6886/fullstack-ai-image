@@ -11,6 +11,8 @@ const Home = () => {
   const [imagePreview, setImagePreview] = useState("");
 const [loading, setLoading] = useState(false);
 const [uploading, setUploading] = useState(false);
+const [filePath, setFilePath] = useState("");
+const [mime, setMime] = useState("");
 
   const uploadImage = async (e: ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files) return;
@@ -33,7 +35,12 @@ const [uploading, setUploading] = useState(false);
 
       if (!res.ok) {
         setError("Failed to upload image");
+        return
       }
+      const data = await res.json();
+
+      setFilePath(data.filePath);
+      setMime(data.mime);
     } catch (err) {
       console.log(err);
     } finally {
@@ -59,6 +66,8 @@ const [uploading, setUploading] = useState(false);
       },
       body: JSON.stringify({
         message: prompt,
+         filePath,
+        mime,
       }),
     });
 

@@ -22,25 +22,22 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({storage}).single("file")
-let filePath;
-let mime;
 app.post("/upload", upload, (req, res) => {
     if (!req.file) {
         return res.status(400).json({
             message: "No file uploaded"
         });
     }
-    filePath = req.file.path
-    mime = req.file.mimetype;
     res.json({
         message: "Uploaded successfully",
-        file: req.file
+        filePath: req.file.path,
+        mime: req.file.mimetype,
     });
 })
 
 app.post("/gemini", async (req, res) => {
     try{
-         const prompt = req.body.message
+         const { message, filePath, mime } = req.body;
         if (!filePath) {
             return res.status(400).json({
                 message: "Upload image first"
