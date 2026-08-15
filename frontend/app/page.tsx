@@ -8,91 +8,141 @@ const Home = () => {
   const [prompt, setPrompt] = useState<string>("")
   const [error, setError] = useState<string>("")
   const [response, setResponse] = useState<string>("")
+  const [imagePreview, setImagePreview] = useState("");
+const [loading, setLoading] = useState(false);
+const [uploading, setUploading] = useState(false);
 
   const uploadImage = async (e: ChangeEvent<HTMLInputElement>) => {
-    const formData = new FormData()
-    if(!e.target.files){
-      throw new Error("Please upload file")
-    }
-    formData.append('file', e.target.files[0])
-    setImage(e.target.files[0])
-    e.target.value = ''
-    const options = {
-      method: "POST",
-      body: formData
-    }
-    try{
-      const res = await fetch("http://localhost:8080/upload", options)
-      if(!res.ok){
-        return console.log("error uploading image")
-      }
-      const data = await res.json()
+    if (!e.target.files) return;
 
-    }catch(err){
-      if(err instanceof Error){
-        console.log(err)
+    setUploading(true);
+
+    try {
+      const file = e.target.files[0];
+
+      setImage(file);
+      setImagePreview(URL.createObjectURL(file));
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("http://localhost:8080/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        setError("Failed to upload image");
       }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setUploading(false);
     }
-  }
+  };
 
   const submitPrompt = async () => {
-    if(!image){
-      setError("Please upload an image")
-      return
-    }
-    const options = {
-      method: "POST",
-      body: JSON.stringify({
-        message: prompt
-      }),
-      headers: {
-        "Content-Type": "application/json"
-      }
-    }
-
-    const res = await fetch("http://localhost:8080/gemini", options)
-    if(!res.ok){
-      setError("Error fetching")
-      return
-    }
-    const data = await res.text()
-    setResponse(data)
+  if (!image) {
+    setError("Please upload an image");
+    return;
   }
 
-  const clear = () => {
-    setImage(null)
-    setPrompt("")
-    setError("")
+  setLoading(true);
+  setError("");
+  setResponse("");
+
+  try {
+    const res = await fetch("http://localhost:8080/gemini", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: prompt,
+      }),
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed");
+    }
+
+    const data = await res.text();
+
+    setResponse(data);
+  } catch {
+    setError("Something went wrong");
+  } finally {
+    setLoading(false);
     setResponse("")
+  }
+};
+
+  const clear = () => {
+     if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+   setImage(null);
+  setImagePreview("");
+  setPrompt("");
+  setError("");
+  setResponse("");
   }
 
   return (
-    <main className="flex justify-center items-center h-screen flex-col gap-10">
-      <section>
-        <div className="relative w-70 h-70">
-          {image && <Image src={URL.createObjectURL(image)} fill alt="uploaded image" />}
+    <main className="max-w-3xl mx-auto flex justify-center p-10 items-center h-screen flex-col gap-0">
+      <section className="flex flex-col gap-3 w-full p-10 pt-20">
+        <div className="relative aspect-video">
+          {imagePreview && (
+            <Image
+              src={imagePreview}
+              fill
+              alt="preview"
+              className="object-cover rounded-xl"
+            />
+          )}
         </div>
-        <div>
-          <label htmlFor='image'>Upload an Image</label>
+        <div className="text-center">
+          <label htmlFor='image' className="underline italic uppercase font-semibold">Upload an Image </label>
           <input hidden id="image" type="file" onChange={uploadImage} />
-          <span>To ask question about.</span>
+          <span>to ask question about.</span>
         </div>
-        <div>
-          <p>What do you want to know about the image?</p>
-          <button>Surprise me</button>
+        <div className="flex justify-between flex-col gap-2  sm:flex-row items-center px-2">
+          <p className="text-zinc-800">What do you want to know about the image?</p>
+          <button className="bg-black text-white px-4 py-1 cursor-pointer text-sm">Surprise me</button>
         </div>
       </section>
       <section>
-        <div>
-          <input type="text" placeholder="What is in the image..." value={prompt} onChange={(e) => setPrompt(e.target.value)} />
-          <button onClick={submitPrompt} >Ask me</button>
+        <div className="flex gap-5">
+          <input className="w-full border border-zinc-400 py-2 px-4 outline-none text-sm" type="text" placeholder="What is in the image..." value={prompt} onChange={(e) => setPrompt(e.target.value)} />
+          <button
+            disabled={loading || uploading}
+            onClick={submitPrompt}
+            className="bg-black text-white px-5 shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "Thinking..." : "Ask Me"}
+          </button>
+          {(error || response) && <button className="bg-zinc-600 text-white text-sm px-3 cursor-pointer" onClick={clear}>Clear</button>}
         </div>
         {(error || response) && <div>
-          <div>
-            {error && <p>{error}</p>}
-            {response && <p>{response}</p>}
+          <div className='mb-6'>
+            {error && <p className="font-semibold text-red-600 bg-red-200 px-2 py-4">{error}</p>}
+            <div className="mt-6">
+              {loading ? (
+                <div className="space-y-3 animate-pulse">
+                  <div className="h-4 bg-zinc-300 rounded" />
+                  <div className="h-4 bg-zinc-300 rounded w-11/12" />
+                  <div className="h-4 bg-zinc-300 rounded w-4/5" />
+                  <div className="h-4 bg-zinc-300 rounded w-3/5" />
+                </div>
+              ) : (
+                response && (
+                  <div className="rounded-xl border bg-zinc-100 p-4 whitespace-pre-wrap">
+                    {response}
+                  </div>
+                )
+              )}
+            </div>
           </div>
-          <button onClick={clear}>Clear</button>
         </div>}
       </section>
     </main>
