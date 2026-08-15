@@ -3,16 +3,15 @@ import cors from "cors"
 import multer from "multer"
 import fs from 'fs'
 import dotenv from "dotenv"
-import OpenAI from "openai"
+import { GoogleGenAI } from "@google/genai";
+
 const app = express()
 const PORT = 8080
 app.use(express.json())
 app.use(cors())
 dotenv.config()
 
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API
-})
+const ai = new GoogleGenAI({ apiKey: process.env.Gemini_API_Key })
 const storage = multer.diskStorage({
     destination:(req, file, cb) => {
         cb(null, "./public")
@@ -24,37 +23,53 @@ const storage = multer.diskStorage({
 
 const upload = multer({storage}).single("file")
 let filePath;
+let mime;
 app.post("/upload", upload, (req, res) => {
     if (!req.file) {
         return res.status(400).json({
             message: "No file uploaded"
         });
     }
-    filePath = req.file
+    filePath = req.file.path
+    mime = req.file.mimetype;
     res.json({
         message: "Uploaded successfully",
         file: req.file
     });
 })
 
-app.post("/openai", (req, res) => {
-    const prompt = req.body.message
-    const imageAsBase64 = fs.readFileSync(filePath, 'base64')
+app.post("/gemini", async (req, res) => {
+    try{
+         const prompt = req.body.message
+        if (!filePath) {
+            return res.status(400).json({
+                message: "Upload image first"
+            });
+        }
+        const imageAsBase64 = fs.readFileSync(filePath, 'base64')
+        const response = await ai.models.generateContent({
+        model: "gemini-3.7-flash",
+       contents: [
+        {
+          inlineData: {
+            mimeType: mime,
+            data: imageAsBase64,
+          },
+        },
+        {
+          text: prompt,
+        },
+      ],
+        })
 
-    const response = openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-            {
-                role: "user",
-                content: [
-                    {type: "text", text: prompt},
-                    {type: "image_url", image_url: {
-                        url: `data:image/jpeg;base64,${imageAsBase64}`
-                    }}
-                ]
-            }
-        ]
-    })
+        res.send(response.text)
+    }catch(err){
+        console.log(err)
+
+        res.status(500).json({
+            message: "Something went wrong"
+        })
+    }
 })
 
 app.listen(PORT, () => {
