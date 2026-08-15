@@ -24,11 +24,10 @@ const Home = () => {
     try{
       const res = await fetch("http://localhost:8080/upload", options)
       if(!res.ok){
-        return console.log("error")
+        return console.log("error uploading image")
       }
       const data = await res.json()
 
-      console.log(data)
     }catch(err){
       if(err instanceof Error){
         console.log(err)

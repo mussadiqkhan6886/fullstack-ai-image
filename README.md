@@ -1,1 +1,1 @@
-# image to text ai generator in nextjs and expressjs
+# image to text ai generator in nextjs and expressjs using gemini ai api
