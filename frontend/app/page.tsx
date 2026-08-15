@@ -95,6 +95,8 @@ const [mime, setMime] = useState("");
   setPrompt("");
   setError("");
   setResponse("");
+   setFilePath("");
+  setMime("");
   }
 
   return (
