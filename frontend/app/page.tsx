@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import React, { ChangeEvent, useState } from 'react'
+import ReactMarkdown from "react-markdown"
 
 const Home = () => {
   const [image, setImage] = useState<null | File>(null)
@@ -100,7 +101,7 @@ const [mime, setMime] = useState("");
   }
 
   return (
-    <main className="max-w-3xl mx-auto flex justify-center p-10 items-center h-screen flex-col gap-0">
+    <main className="max-w-3xl mx-auto flex justify-center p-10 items-center min-h-screen flex-col gap-0">
       <section className="flex flex-col gap-3 w-full p-10 pt-20">
         <div className="relative aspect-video">
           {imagePreview && (
@@ -145,9 +146,9 @@ const [mime, setMime] = useState("");
                   <div className="h-2 w-2 bg-zinc-800 rounded " />
                 </div>
               ) : (
-                  <div className="rounded-xl border bg-zinc-100 p-4 whitespace-pre-wrap">
-                    {response}
-                  </div>
+                  (response && <div className=" bg-zinc-100 p-4 whitespace-pre-wrap">
+                    <ReactMarkdown>{response}</ReactMarkdown>
+                  </div>)
               )}
             </div>
           </div>
