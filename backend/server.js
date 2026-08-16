@@ -38,12 +38,14 @@ app.post("/upload", upload, (req, res) => {
 app.post("/gemini", async (req, res) => {
     try{
          const { message, filePath, mime } = req.body;
+         console.log(message)
         if (!filePath) {
             return res.status(400).json({
                 message: "Upload image first"
             });
         }
         const imageAsBase64 = fs.readFileSync(filePath, 'base64')
+        console.log(filePath)
         const response = await ai.models.generateContent({
         model: "gemini-3.7-flash",
        contents: [
@@ -54,12 +56,14 @@ app.post("/gemini", async (req, res) => {
           },
         },
         {
-          text: prompt,
+          text: message,
         },
       ],
         })
-
-        res.send(response.text)
+        console.log(response.text)
+        res.json({
+            answer: response.text
+        })
     }catch(err){
         console.log(err)
 

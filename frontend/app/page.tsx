@@ -75,9 +75,9 @@ const [mime, setMime] = useState("");
       throw new Error("Failed");
     }
 
-    const data = await res.text();
+    const data = await res.json();
 
-    setResponse(data);
+    setResponse(data.answer);
   } catch {
     setError("Something went wrong");
   } finally {
