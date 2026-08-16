@@ -76,13 +76,13 @@ const [mime, setMime] = useState("");
     }
 
     const data = await res.json();
-
+    console.log(data.answer)
     setResponse(data.answer);
+    console.log(response)
   } catch {
     setError("Something went wrong");
   } finally {
     setLoading(false);
-    setResponse("")
   }
 };
 
@@ -145,11 +145,9 @@ const [mime, setMime] = useState("");
                   <div className="h-2 w-2 bg-zinc-800 rounded " />
                 </div>
               ) : (
-                response && (
                   <div className="rounded-xl border bg-zinc-100 p-4 whitespace-pre-wrap">
                     {response}
                   </div>
-                )
               )}
             </div>
           </div>
